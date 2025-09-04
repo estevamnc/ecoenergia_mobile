@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,5 +56,35 @@ class ApiService {
     } else {
       throw Exception('Falha ao carregar dados da residência');
     }
+  }
+
+  // NOVO: Busca o histórico de consumo para o gráfico.
+  Future<List<dynamic>> getConsumptionHistory({String period = '7d'}) async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/consumption/history?period=$period'),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Falha ao carregar o histórico de consumo');
+    }
+  }
+
+  // NOVO: Busca uma dica aleatória.
+  Future<Map<String, dynamic>> getRandomTip() async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/tips'),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> tips = jsonDecode(response.body);
+      if (tips.isNotEmpty) {
+        return tips[Random().nextInt(tips.length)];
+      }
+    }
+    return {}; // Retorna um mapa vazio se não houver dicas.
   }
 }

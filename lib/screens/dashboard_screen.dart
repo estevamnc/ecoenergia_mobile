@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart'; // Pacote para formatação de datas
+import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -11,19 +11,15 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  // Variáveis de estado
   bool _isLoading = true;
   String _userName = '';
   String _currentMonthConsumption = '0.00';
   String _estimatedCost = '0.00';
   String? _errorMessage;
-
-  // Variáveis de estado para os novos componentes
-  List<dynamic> _historyData = []; // Armazena os dados brutos do histórico
+  List<dynamic> _historyData = [];
   bool _isGoalMet = true;
   String _monthlyGoal = '0';
   Map<String, dynamic> _randomTip = {};
-
   final ApiService _apiService = ApiService();
 
   @override
@@ -33,6 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _fetchDashboardData() async {
+    // ... (lógica de fetch de dados, sem alterações)
     try {
       final results = await Future.wait([
         _apiService.getUserData(),
@@ -41,14 +38,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _apiService.getConsumptionHistory(period: '7d'),
         _apiService.getRandomTip(),
       ]);
-
       final userData = results[0] as Map<String, dynamic>;
       final summaryData = results[1] as Map<String, dynamic>;
       final residenceData = results[2] as Map<String, dynamic>;
       final historyData = results[3] as List<dynamic>;
       final tipData = results[4] as Map<String, dynamic>;
-
-      // Processamento dos dados
       final double kwh =
           double.tryParse(summaryData['current_month_kwh'].toString()) ?? 0.0;
       final double kwhCost =
@@ -56,8 +50,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final double monthlyGoal =
           double.tryParse(residenceData['monthly_goal_kwh'].toString()) ?? 0.0;
       final cost = kwh * kwhCost;
-
-      // Atualiza o estado com todos os dados
       if (mounted) {
         setState(() {
           _userName = userData['name']?.split(' ')[0] ?? 'Usuário';
@@ -65,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _estimatedCost = cost.toStringAsFixed(2);
           _monthlyGoal = monthlyGoal.toStringAsFixed(0);
           _isGoalMet = kwh <= monthlyGoal;
-          _historyData = historyData; // Armazena os dados para o gráfico
+          _historyData = historyData;
           _randomTip = tipData;
           _isLoading = false;
         });
@@ -81,16 +73,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  // Widgets de construção da UI
   Widget _buildSummaryCard(String title, String value) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Card(
-        elevation: 0,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFDEE2E6)),
-        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           child: Column(
@@ -98,16 +84,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Color(0xFF6C757D)),
+                style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 8),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF212529),
-                ),
+                style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
               ),
             ],
           ),
@@ -116,62 +98,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // GRÁFICO ATUALIZADO
   Widget _buildBarChart() {
+    final theme = Theme.of(context);
     return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFDEE2E6)),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Consumo dos últimos 7 Dias",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleLarge?.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 20),
             SizedBox(
               height: 200,
               child: BarChart(
                 BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  // Gera os dados das barras a partir do nosso estado _historyData
                   barGroups: _historyData.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final data = entry.value;
                     return BarChartGroupData(
-                      x: index,
+                      x: entry.key,
                       barRods: [
                         BarChartRodData(
-                          toY: double.tryParse(data['kwh'].toString()) ?? 0.0,
-                          color: const Color(0xFF3B82F6),
+                          toY:
+                              double.tryParse(entry.value['kwh'].toString()) ??
+                              0.0,
+                          color: theme.colorScheme.primary,
                           width: 16,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ],
                     );
                   }).toList(),
-                  // Configuração do tooltip que aparece ao tocar
                   barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
-                      tooltipColor: Colors.blueGrey, // <-- CORREÇÃO AQUI
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        return BarTooltipItem(
-                          '${rod.toY.toStringAsFixed(1)} kWh',
-                          const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                      getTooltipColor: (_) => Colors.blueGrey,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) =>
+                          BarTooltipItem(
+                            '${rod.toY.toStringAsFixed(1)} kWh',
+                            const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        );
-                      },
                     ),
                   ),
-                  // Configuração dos títulos (eixos X e Y)
                   titlesData: FlTitlesData(
                     show: true,
                     topTitles: const AxisTitles(
@@ -180,29 +151,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     rightTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
                     ),
-                    // Títulos do eixo esquerdo (Y)
-                    leftTitles: const AxisTitles(
+                    leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 40,
+                        getTitlesWidget: (value, meta) => Text(
+                          value.toInt().toString(),
+                          style: theme.textTheme.bodySmall,
+                        ),
                       ),
                     ),
-                    // Títulos do eixo inferior (X)
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        getTitlesWidget: (value, meta) {
-                          // Pega a data correspondente e formata para "dd/MM"
+                        getTitlesWidget: (double value, TitleMeta meta) {
                           final index = value.toInt();
                           if (index >= 0 && index < _historyData.length) {
                             final date = DateTime.parse(
                               _historyData[index]['date'],
                             );
-                            return SideTitleWidget(
-                              axisSide: meta.axisSide,
-                              space: 4,
-                              child: Text(DateFormat('dd/MM').format(date)),
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text(
+                                DateFormat('dd/MM').format(date),
+                                style: theme.textTheme.bodySmall,
+                              ),
                             );
                           }
                           return const Text('');
@@ -211,10 +185,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                   borderData: FlBorderData(show: false),
-                  // Adiciona as linhas de grade horizontais
-                  gridData: const FlGridData(
+                  gridData: FlGridData(
                     show: true,
-                    drawVerticalLine: false, // Sem linhas verticais
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (value) =>
+                        FlLine(color: theme.dividerColor, strokeWidth: 0.5),
                   ),
                 ),
               ),
@@ -226,10 +201,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildGoalMessageCard() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: _isGoalMet ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+        color: _isGoalMet ? AppTheme.successColor : theme.colorScheme.error,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -257,14 +233,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildTipCard() {
     if (_randomTip.isEmpty) return const SizedBox.shrink();
-
+    final theme = Theme.of(context);
     return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFDEE2E6)),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -272,12 +242,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text(
               _randomTip['title'] ?? 'Dica do Dia',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleLarge?.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
               _randomTip['description'] ?? '',
-              style: const TextStyle(color: Color(0xFF6C757D)),
+              style: theme.textTheme.bodyMedium,
             ),
           ],
         ),
@@ -287,6 +257,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: _isLoading
@@ -297,7 +268,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   padding: const EdgeInsets.all(20.0),
                   child: Text(
                     _errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 16),
+                    style: TextStyle(
+                      color: theme.colorScheme.error,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               )
@@ -308,11 +282,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Text(
                       'Olá, $_userName!',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212529),
-                      ),
+                      style: theme.textTheme.titleLarge?.copyWith(fontSize: 28),
                     ),
                     const SizedBox(height: 20),
                     Row(

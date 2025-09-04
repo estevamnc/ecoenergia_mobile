@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'register_screen.dart';
-import 'home_screen.dart'; // Importa a nova tela principal
-import '../services/auth_service.dart'; // Importa nosso serviço de autenticação
+import 'home_screen.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,15 +14,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  // Nova variável de estado para controlar o loading.
   bool _isLoading = false;
-  // Instância do nosso serviço de autenticação.
-  final AuthService _authService = AuthService();
 
-  // Função assíncrona para lidar com o processo de login.
   Future<void> _handleLogin() async {
-    // Validação simples para campos vazios.
+    final authService = Provider.of<AuthService>(context, listen: false);
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos.')),
@@ -29,28 +25,22 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Ativa o estado de loading.
     setState(() {
       _isLoading = true;
     });
 
-    final success = await _authService.login(
+    final success = await authService.login(
       _emailController.text,
       _passwordController.text,
     );
 
-    // Desativa o estado de loading após a API responder.
     if (mounted) {
-      // Garante que a tela ainda está "viva"
       setState(() {
         _isLoading = false;
       });
     }
 
     if (success) {
-      // Se o login for bem-sucedido, navega para a HomeScreen.
-      // pushAndRemoveUntil apaga as telas anteriores (login, landing)
-      // para que o usuário não possa voltar para elas.
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -58,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } else {
-      // Se falhar, mostra um diálogo de erro.
       if (mounted) {
         showDialog(
           context: context,
@@ -86,6 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: SingleChildScrollView(
         child: SafeArea(
@@ -97,9 +88,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: Colors.black,
+                      color: theme.textTheme.bodyLarge?.color,
                       size: 30,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
@@ -108,23 +99,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 40),
                 Card(
                   elevation: 0,
-                  color: const Color(0xFFFFFFFF),
+                  color: theme.cardColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: Color(0xFFDEE2E6)),
+                    side: BorderSide(color: theme.dividerColor),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(25.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
+                        Text(
                           'Bem-vindo!',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: theme.textTheme.titleLarge?.copyWith(
                             fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF212529),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -134,7 +123,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           decoration: InputDecoration(
                             hintText: 'Email',
                             filled: true,
-                            fillColor: const Color(0xFFF0F2F5),
+                            fillColor: theme.scaffoldBackgroundColor.withAlpha(
+                              240,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
@@ -148,7 +139,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           decoration: InputDecoration(
                             hintText: 'Senha',
                             filled: true,
-                            fillColor: const Color(0xFFF0F2F5),
+                            fillColor: theme.scaffoldBackgroundColor.withAlpha(
+                              240,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
@@ -157,16 +150,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 20),
                         ElevatedButton(
-                          // Desabilita o botão enquanto estiver carregando.
                           onPressed: _isLoading ? null : _handleLogin,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3B82F6),
+                            backgroundColor: theme.colorScheme.primary,
                             minimumSize: const Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          // Mostra um indicador de progresso ou o texto.
                           child: _isLoading
                               ? const SizedBox(
                                   height: 24,
@@ -199,10 +190,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     'Não tem conta? Cadastre-se',
                     style: TextStyle(
-                      color: Color(0xFF3B82F6),
+                      color: theme.colorScheme.primary,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),

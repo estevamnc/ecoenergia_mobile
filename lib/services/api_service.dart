@@ -58,7 +58,7 @@ class ApiService {
     }
   }
 
-  // NOVO: Busca o histórico de consumo para o gráfico.
+  // Busca o histórico de consumo para o gráfico.
   Future<List<dynamic>> getConsumptionHistory({String period = '7d'}) async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -72,7 +72,7 @@ class ApiService {
     }
   }
 
-  // NOVO: Busca uma dica aleatória.
+  // Busca uma dica aleatória.
   Future<Map<String, dynamic>> getRandomTip() async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -86,5 +86,35 @@ class ApiService {
       }
     }
     return {}; // Retorna um mapa vazio se não houver dicas.
+  }
+
+  // Busca a lista de todos os eletrodomésticos.
+  Future<List<dynamic>> getAppliances() async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/appliances'),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      // A API retorna um mapa de categorias, então juntamos todas as listas.
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      return data.values.expand((list) => list).toList();
+    } else {
+      throw Exception('Falha ao carregar a lista de eletrodomésticos');
+    }
+  }
+
+  // NOVO: Busca a lista de todas as dicas.
+  Future<List<dynamic>> getTips() async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/tips'),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Falha ao carregar as dicas');
+    }
   }
 }

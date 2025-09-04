@@ -36,4 +36,12 @@ class AuthService {
       return false;
     }
   }
+
+  // NOVO: Função para fazer logout.
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Limpa os dados do utilizador do armazenamento local.
+    await prefs.remove('token');
+    await prefs.remove('user');
+  }
 }

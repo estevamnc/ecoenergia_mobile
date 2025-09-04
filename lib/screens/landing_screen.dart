@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
-import 'register_screen.dart'; // 1. Importa a nova tela de registro
+import 'register_screen.dart';
 
-// A classe LandingScreen agora vive em seu próprio arquivo.
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Acede ao tema atual
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -21,19 +23,25 @@ class LandingScreen extends StatelessWidget {
                   width: 180,
                   height: 180,
                   errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.broken_image, size: 180);
+                    return Icon(
+                      Icons.broken_image,
+                      size: 180,
+                      color: theme.textTheme.bodyMedium?.color,
+                    );
                   },
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'A energia que você controla, o dinheiro que você economiza.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Color(0xFF6C757D)),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: theme.textTheme.bodyMedium?.color, // Cor do tema
+                  ),
                 ),
                 const SizedBox(height: 40),
                 ElevatedButton(
                   onPressed: () {
-                    // ATUALIZADO: Agora navega para a LoginScreen!
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -42,7 +50,7 @@ class LandingScreen extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3B82F6),
+                    backgroundColor: theme.colorScheme.primary, // Cor do tema
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -53,14 +61,14 @@ class LandingScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors
+                          .white, // Texto do botão primário é geralmente branco
                     ),
                   ),
                 ),
                 const SizedBox(height: 15),
                 OutlinedButton(
                   onPressed: () {
-                    // 2. ATUALIZADO: Adiciona a navegação para a tela de Registro
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -69,18 +77,21 @@ class LandingScreen extends StatelessWidget {
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary,
+                      width: 2,
+                    ), // Cor do tema
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Registar',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF3B82F6),
+                      color: theme.colorScheme.primary, // Cor do tema
                     ),
                   ),
                 ),

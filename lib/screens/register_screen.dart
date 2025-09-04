@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// 1. Transformado em StatefulWidget
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -9,12 +8,10 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // 2. Controladores para cada campo de texto
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // 3. Limpeza dos controladores
   @override
   void dispose() {
     _nameController.dispose();
@@ -33,7 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Botão de "voltar"
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
@@ -46,8 +42,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-
-                // Card com o formulário
                 Card(
                   elevation: 0,
                   color: const Color(0xFFFFFFFF),
@@ -70,8 +64,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-
-                        // Campo de Texto para Nome
                         TextField(
                           controller: _nameController,
                           decoration: InputDecoration(
@@ -85,8 +77,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Campo de Texto para Email
                         TextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
@@ -101,8 +91,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Campo de Texto para Senha
                         TextField(
                           controller: _passwordController,
                           obscureText: true,
@@ -117,8 +105,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-
-                        // Botão Cadastrar
                         ElevatedButton(
                           onPressed: () {
                             // TODO: Implementar a lógica de registro
@@ -147,8 +133,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Link para voltar para a tela de Login
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();

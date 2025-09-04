@@ -107,7 +107,9 @@ class SettingsScreen extends StatelessWidget {
                               // Chama a função do provider para alterar o tema
                               themeProvider.toggleTheme(value);
                             },
-                            activeColor: Theme.of(context).colorScheme.primary,
+                            activeThumbColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                           ),
                         ],
                       ),

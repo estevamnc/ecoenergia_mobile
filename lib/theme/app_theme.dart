@@ -25,7 +25,7 @@ class AppTheme {
       primary: primaryColor,
       secondary: primaryColor,
       error: dangerColor,
-      background: Color(0xFFF8F9FA),
+      surface: Color(0xFFF8F9FA),
     ),
     // ... outras propriedades do tema claro
   );
@@ -46,7 +46,7 @@ class AppTheme {
       primary: primaryColor,
       secondary: primaryColor,
       error: dangerColor,
-      background: Color(0xFF121212),
+      surface: Color(0xFF121212),
     ),
     // ... outras propriedades do tema escuro
   );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../theme/app_theme.dart'; // Importa o nosso ficheiro de tema
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -29,7 +30,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _fetchDashboardData() async {
-    // ... (lógica de fetch de dados, sem alterações)
     try {
       final results = await Future.wait([
         _apiService.getUserData(),

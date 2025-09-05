@@ -21,33 +21,49 @@ class AppTheme {
         fontWeight: FontWeight.bold,
       ),
     ),
+    // CORREÇÃO: Usar CardThemeData em vez de CardTheme
+    cardTheme: const CardThemeData(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+        side: BorderSide(color: Color(0xFFDEE2E6)),
+      ),
+    ),
     colorScheme: const ColorScheme.light(
       primary: primaryColor,
       secondary: primaryColor,
       error: dangerColor,
-      surface: Color(0xFFF8F9FA),
+      background: Color(0xFFF8F9FA),
     ),
-    // ... outras propriedades do tema claro
   );
 
-  // Tema Escuro
+  // Tema Escuro ATUALIZADO
   static final ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     primaryColor: primaryColor,
-    scaffoldBackgroundColor: const Color(0xFF121212),
-    cardColor: const Color(0xFF1E1E1E),
+    scaffoldBackgroundColor: Colors.black, // Fundo preto profundo
+    cardColor: const Color(
+      0xFF1C1C1E,
+    ), // Cinza escuro para os cards, como na referência
     dividerColor: const Color(0xFF333333),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Colors.white),
       bodyMedium: TextStyle(color: Color(0xFFb0b0b0)),
       titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
     ),
+    // CORREÇÃO: Usar CardThemeData em vez de CardTheme
+    cardTheme: CardThemeData(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
+        side: BorderSide(color: const Color(0xFF1C1C1E).withOpacity(0.5)),
+      ),
+    ),
     colorScheme: const ColorScheme.dark(
       primary: primaryColor,
       secondary: primaryColor,
       error: dangerColor,
-      surface: Color(0xFF121212),
+      background: Colors.black,
     ),
-    // ... outras propriedades do tema escuro
   );
 }

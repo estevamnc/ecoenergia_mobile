@@ -28,6 +28,25 @@ class ApiService {
     return {};
   }
 
+  // NOVO: Atualiza os dados do perfil do utilizador.
+  Future<Map<String, dynamic>> updateUserData(String name, String email) async {
+    final headers = await _getHeaders();
+    final response = await http.put(
+      Uri.parse('$_baseUrl/users/me'),
+      headers: headers,
+      body: jsonEncode({'name': name, 'email': email}),
+    );
+    if (response.statusCode == 200) {
+      final updatedUser = jsonDecode(response.body);
+      // Atualiza também os dados guardados localmente.
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user', jsonEncode(updatedUser));
+      return updatedUser;
+    } else {
+      throw Exception('Falha ao atualizar o perfil');
+    }
+  }
+
   // Busca o resumo de consumo.
   Future<Map<String, dynamic>> getConsumptionSummary() async {
     final headers = await _getHeaders();
@@ -55,6 +74,19 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception('Falha ao carregar dados da residência');
+    }
+  }
+
+  // NOVO: Atualiza os dados da residência.
+  Future<void> updateResidenceData(Map<String, dynamic> data) async {
+    final headers = await _getHeaders();
+    final response = await http.put(
+      Uri.parse('$_baseUrl/residence/me'),
+      headers: headers,
+      body: jsonEncode(data),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Falha ao atualizar os dados da residência');
     }
   }
 
@@ -104,7 +136,7 @@ class ApiService {
     }
   }
 
-  // NOVO: Busca a lista de todas as dicas.
+  // Busca a lista de todas as dicas.
   Future<List<dynamic>> getTips() async {
     final headers = await _getHeaders();
     final response = await http.get(

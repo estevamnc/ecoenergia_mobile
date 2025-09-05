@@ -37,7 +37,23 @@ class AuthService {
     }
   }
 
-  // NOVO: Função para fazer logout.
+  // NOVO: Função para registar um novo utilizador.
+  Future<bool> register(String name, String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_apiUrl/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'name': name, 'email': email, 'password': password}),
+      );
+      // 201 (Created) é o código de sucesso esperado para um registo.
+      return response.statusCode == 201;
+    } catch (e) {
+      print('Erro na chamada de API de registo: $e');
+      return false;
+    }
+  }
+
+  // Função para fazer logout.
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     // Limpa os dados do utilizador do armazenamento local.

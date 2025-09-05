@@ -13,7 +13,7 @@ class _TipsScreenState extends State<TipsScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   List<dynamic> _allTips = [];
-  String _activeCategory = 'Geral'; // Categoria ativa por defeito
+  String _activeCategory = 'Geral';
 
   final ApiService _apiService = ApiService();
   final List<String> _categories = const [
@@ -50,7 +50,6 @@ class _TipsScreenState extends State<TipsScreen> {
     }
   }
 
-  // Getter para filtrar as dicas com base na categoria ativa
   List<dynamic> get _filteredTips {
     if (_activeCategory == 'Geral') {
       return _allTips;
@@ -60,6 +59,7 @@ class _TipsScreenState extends State<TipsScreen> {
 
   // Widgets de construção da UI
   Widget _buildCategoryTabs() {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -75,18 +75,18 @@ class _TipsScreenState extends State<TipsScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 5),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF3B82F6) : Colors.white,
+                color: isSelected ? theme.primaryColor : theme.cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF3B82F6)
-                      : const Color(0xFFDEE2E6),
+                  color: isSelected ? theme.primaryColor : theme.dividerColor,
                 ),
               ),
               child: Text(
                 category,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : const Color(0xFF212529),
+                  color: isSelected
+                      ? Colors.white
+                      : theme.textTheme.bodyLarge?.color,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -98,16 +98,18 @@ class _TipsScreenState extends State<TipsScreen> {
   }
 
   Widget _buildTipsList() {
+    final theme = Theme.of(context);
     final tipsToShow = _filteredTips;
 
     if (tipsToShow.isEmpty) {
-      return const Card(
-        elevation: 0,
-        color: Colors.white,
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Center(
-            child: Text("Nenhuma dica encontrada para esta categoria."),
+            child: Text(
+              "Nenhuma dica encontrada para esta categoria.",
+              style: theme.textTheme.bodyMedium,
+            ),
           ),
         ),
       );
@@ -120,13 +122,7 @@ class _TipsScreenState extends State<TipsScreen> {
       itemBuilder: (context, index) {
         final tip = tipsToShow[index];
         return Card(
-          elevation: 0,
-          color: Colors.white,
           margin: const EdgeInsets.only(bottom: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFDEE2E6)),
-          ),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -134,17 +130,13 @@ class _TipsScreenState extends State<TipsScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(
-                      Icons.lightbulb_outline,
-                      color: Color(0xFF3B82F6),
-                    ),
+                    Icon(Icons.lightbulb_outline, color: theme.primaryColor),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         tip['title'] ?? 'Dica',
-                        style: const TextStyle(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           fontSize: 18,
-                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -153,7 +145,7 @@ class _TipsScreenState extends State<TipsScreen> {
                 const SizedBox(height: 10),
                 Text(
                   tip['description'] ?? '',
-                  style: const TextStyle(color: Color(0xFF6C757D), height: 1.5),
+                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                 ),
               ],
             ),
@@ -165,6 +157,7 @@ class _TipsScreenState extends State<TipsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: _isLoading
@@ -173,7 +166,10 @@ class _TipsScreenState extends State<TipsScreen> {
             ? Center(
                 child: Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  style: TextStyle(
+                    color: theme.colorScheme.error,
+                    fontSize: 16,
+                  ),
                 ),
               )
             : SingleChildScrollView(
@@ -181,12 +177,9 @@ class _TipsScreenState extends State<TipsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Dicas de Economia',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.titleLarge?.copyWith(fontSize: 28),
                     ),
                     const SizedBox(height: 20),
                     _buildCategoryTabs(),

@@ -26,9 +26,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _fetchHistory();
   }
 
-  // Função para buscar os dados com base no período selecionado
   Future<void> _fetchHistory() async {
-    // Garante que o estado de loading é ativado no início
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -63,17 +61,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  // Função para mudar o período e recarregar os dados
   void _changePeriod(String newPeriod) {
     setState(() {
       _activePeriod = newPeriod;
-      _fetchHistory(); // Busca os dados novamente com o novo período
+      _fetchHistory();
     });
   }
 
   // Widgets de construção da UI
   Widget _buildPeriodSelector() {
-    // ... (código do seletor de período)
+    final theme = Theme.of(context);
     final periods = {
       '7d': '7 Dias',
       '30d': '30 Dias',
@@ -81,9 +78,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     };
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFDEE2E6)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -95,16 +92,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF3B82F6)
-                      : Colors.transparent,
+                  color: isSelected ? theme.primaryColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   entry.value,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : const Color(0xFF212529),
+                    color: isSelected
+                        ? Colors.white
+                        : theme.textTheme.bodyLarge?.color,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -143,27 +140,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         const SizedBox(height: 15),
         Card(
-          elevation: 0,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFDEE2E6)),
-          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
             child: Column(
               children: [
-                const Text(
+                Text(
                   'Média Diária',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF6C757D)),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '${dailyAverage.toStringAsFixed(2)} kWh',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontSize: 20),
                 ),
               ],
             ),
@@ -174,14 +164,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildSummaryCard(String title, String value) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Card(
-        elevation: 0,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFDEE2E6)),
-        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           child: Column(
@@ -189,16 +174,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Color(0xFF6C757D)),
+                style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 8),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF212529),
-                ),
+                style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
               ),
             ],
           ),
@@ -208,7 +189,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildLineChart() {
-    // Cria os pontos (FlSpot) para o gráfico a partir dos dados do histórico
+    final theme = Theme.of(context);
     final spots = _historyData.asMap().entries.map((entry) {
       return FlSpot(
         entry.key.toDouble(),
@@ -217,29 +198,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }).toList();
 
     return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFDEE2E6)),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Consumo Diário (kWh)",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleLarge?.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 20),
             SizedBox(
               height: 200,
               child: LineChart(
                 LineChartData(
-                  gridData: const FlGridData(
+                  gridData: FlGridData(
                     show: true,
                     drawVerticalLine: false,
+                    getDrawingHorizontalLine: (value) =>
+                        FlLine(color: theme.dividerColor, strokeWidth: 0.5),
                   ),
                   titlesData: FlTitlesData(
                     show: true,
@@ -249,10 +226,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     rightTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
                     ),
-                    leftTitles: const AxisTitles(
+                    leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 40,
+                        interval: 5, // Define o intervalo para 5
+                        getTitlesWidget: (value, meta) => Text(
+                          value.toInt().toString(),
+                          style: theme.textTheme.bodySmall,
+                        ),
                       ),
                     ),
                     bottomTitles: AxisTitles(
@@ -261,7 +243,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         reservedSize: 30,
                         interval: _historyData.length > 7
                             ? (_historyData.length / 5).roundToDouble()
-                            : 1, // Ajusta o intervalo dos rótulos
+                            : 1,
                         getTitlesWidget: (value, meta) {
                           final index = value.toInt();
                           if (index >= 0 && index < _historyData.length) {
@@ -272,10 +254,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               padding: const EdgeInsets.only(top: 4.0),
                               child: Text(
                                 DateFormat('dd/MM').format(date),
-                                style: const TextStyle(
-                                  color: Color(0xFF6C757D),
-                                  fontSize: 12,
-                                ),
+                                style: theme.textTheme.bodySmall,
                               ),
                             );
                           }
@@ -289,13 +268,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     LineChartBarData(
                       spots: spots,
                       isCurved: true,
-                      color: const Color(0xFF3B82F6),
+                      color: theme.primaryColor,
                       barWidth: 4,
                       isStrokeCapRound: true,
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: const Color(0xFF3B82F6).withOpacity(0.3),
+                        color: theme.primaryColor.withOpacity(0.3),
                       ),
                     ),
                   ],
@@ -310,6 +289,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: _isLoading
@@ -318,7 +298,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ? Center(
                 child: Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  style: TextStyle(
+                    color: theme.colorScheme.error,
+                    fontSize: 16,
+                  ),
                 ),
               )
             : SingleChildScrollView(
@@ -326,12 +309,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Histórico',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.titleLarge?.copyWith(fontSize: 28),
                     ),
                     const SizedBox(height: 20),
                     _buildPeriodSelector(),

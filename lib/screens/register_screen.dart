@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -8,9 +10,68 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  // Controladores para cada campo de texto
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _handleRegister() async {
+    // Acede ao AuthService através do Provider
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    // Validação dos campos
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, preencha todos os campos.')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final success = await authService.register(
+      _nameController.text,
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    if (mounted) setState(() => _isLoading = false);
+
+    if (success) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Registo realizado com sucesso! Por favor, faça login.',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop(); // Volta para o ecrã de login
+      }
+    } else {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Falha no Registo'),
+            content: const Text(
+              'Não foi possível criar a conta. Verifique os dados ou tente novamente mais tarde.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -22,6 +83,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: SingleChildScrollView(
         child: SafeArea(
@@ -33,9 +96,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: Colors.black,
+                      color: theme.textTheme.bodyLarge?.color,
                       size: 30,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
@@ -44,23 +107,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 40),
                 Card(
                   elevation: 0,
-                  color: const Color(0xFFFFFFFF),
+                  color: theme.cardColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: Color(0xFFDEE2E6)),
+                    side: BorderSide(color: theme.dividerColor),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(25.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
+                        Text(
                           'Crie sua Conta',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: theme.textTheme.titleLarge?.copyWith(
                             fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF212529),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -69,7 +130,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           decoration: InputDecoration(
                             hintText: 'Nome Completo',
                             filled: true,
-                            fillColor: const Color(0xFFF0F2F5),
+                            fillColor: theme.scaffoldBackgroundColor.withAlpha(
+                              240,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
@@ -83,7 +146,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           decoration: InputDecoration(
                             hintText: 'Email',
                             filled: true,
-                            fillColor: const Color(0xFFF0F2F5),
+                            fillColor: theme.scaffoldBackgroundColor.withAlpha(
+                              240,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
@@ -97,7 +162,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           decoration: InputDecoration(
                             hintText: 'Senha',
                             filled: true,
-                            fillColor: const Color(0xFFF0F2F5),
+                            fillColor: theme.scaffoldBackgroundColor.withAlpha(
+                              240,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
@@ -106,27 +173,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed: () {
-                            // TODO: Implementar a lógica de registro
-                            print('Nome: ${_nameController.text}');
-                            print('Email: ${_emailController.text}');
-                            print('Senha: ${_passwordController.text}');
-                          },
+                          onPressed: _isLoading ? null : _handleRegister,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3B82F6),
+                            backgroundColor: theme.colorScheme.primary,
                             minimumSize: const Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Cadastrar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                              : const Text(
+                                  'Cadastrar',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ],
                     ),
@@ -137,10 +208,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text(
+                  child: Text(
                     'Já tem conta? Faça login',
                     style: TextStyle(
-                      color: Color(0xFF3B82F6),
+                      color: theme.colorScheme.primary,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),

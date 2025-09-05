@@ -31,8 +31,6 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
   List<dynamic> _allAppliances = [];
   double _kwhCost = 0.0;
 
-  // Mapa para guardar os inputs dos aparelhos selecionados
-  // A chave é o ID do aparelho (int)
   final Map<int, SimulationInput> _simulationInputs = {};
 
   final ApiService _apiService = ApiService();
@@ -43,7 +41,6 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
     _fetchSimulatorData();
   }
 
-  // Limpa os controladores de texto da memória
   @override
   void dispose() {
     for (var input in _simulationInputs.values) {
@@ -79,7 +76,6 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
     }
   }
 
-  // Calcula os resultados da simulação
   Map<String, double> _calculateSimulation() {
     double totalKwhPerMonth = 0.0;
 
@@ -93,8 +89,7 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
 
       if (power > 0) {
         final kwhPerDay = (power * hours) / 1000;
-        final kwhPerMonth =
-            (kwhPerDay * days * 4.345); // Média de semanas no mês
+        final kwhPerMonth = (kwhPerDay * days * 4.345);
         totalKwhPerMonth += kwhPerMonth;
       }
     });
@@ -105,7 +100,6 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
     };
   }
 
-  // Lida com a seleção/desseleção de um aparelho
   void _handleSelectionChange(int applianceId, bool isSelected) {
     setState(() {
       if (isSelected) {
@@ -119,34 +113,29 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
 
   // Widgets de construção da UI
   Widget _buildResultCard() {
+    final theme = Theme.of(context);
     final results = _calculateSimulation();
     return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFDEE2E6)),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            const Text(
+            Text(
               "Estimativa Mensal",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleLarge?.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
               "Consumo: ${results['monthlyKwh']!.toStringAsFixed(2)} kWh",
-              style: const TextStyle(fontSize: 16),
+              style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 8),
             Text(
               "Custo: R\$ ${results['monthlyCost']!.toStringAsFixed(2)}",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF3B82F6),
+                color: theme.primaryColor,
               ),
             ),
           ],
@@ -156,24 +145,18 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
   }
 
   Widget _buildApplianceList() {
+    final theme = Theme.of(context);
     return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFDEE2E6)),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Selecione os Aparelhos e o Uso",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleLarge?.copyWith(fontSize: 18),
             ),
             const SizedBox(height: 10),
-            // ListView para os aparelhos
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -187,14 +170,16 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
                   children: [
                     CheckboxListTile(
                       title: Text(appliance['name']),
-                      subtitle: Text('${appliance['power_watts']} W'),
+                      subtitle: Text(
+                        '${appliance['power_watts']} W',
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       value: isSelected,
                       onChanged: (bool? value) {
                         _handleSelectionChange(applianceId, value ?? false);
                       },
-                      activeColor: const Color(0xFF3B82F6),
+                      activeColor: theme.primaryColor,
                     ),
-                    // Mostra os campos de input se o aparelho estiver selecionado
                     if (isSelected)
                       Padding(
                         padding: const EdgeInsets.symmetric(
@@ -226,6 +211,7 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
   }
 
   Widget _buildUsageInput(TextEditingController controller, String label) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         SizedBox(
@@ -235,21 +221,24 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(vertical: 8),
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              fillColor: theme.scaffoldBackgroundColor,
+              filled: true,
             ),
-            onChanged: (_) => setState(() {}), // Recalcula a cada mudança
+            onChanged: (_) => setState(() {}),
           ),
         ),
         const SizedBox(width: 8),
-        Text(label),
+        Text(label, style: theme.textTheme.bodyMedium),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: _isLoading
@@ -258,7 +247,10 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
             ? Center(
                 child: Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  style: TextStyle(
+                    color: theme.colorScheme.error,
+                    fontSize: 16,
+                  ),
                 ),
               )
             : SingleChildScrollView(
@@ -266,12 +258,9 @@ class _SimulatorScreenState extends State<SimulatorScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Simulador',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.titleLarge?.copyWith(fontSize: 28),
                     ),
                     const SizedBox(height: 20),
                     _buildResultCard(),
